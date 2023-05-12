@@ -1,4 +1,4 @@
-# Projeto Conceitual de Banco de Dados – E-COMMERCE
+# Projeto de Banco de Dados – E-COMMERCE
 Esquema para avaliação do desafio de projeto. 
 ### Objetivo:
 
