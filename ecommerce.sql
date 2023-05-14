@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS endereco(
         complemento VARCHAR(255),
         PRIMARY KEY (enderecoID)
 );
+-- adicionando coluna UF
+ALTER TABLE endereco
+	ADD COLUMN uf CHAR(2);
 
 CREATE TABLE IF NOT EXISTS fornecedor(
 		fornecedorID INT AUTO_INCREMENT NOT NULL,
@@ -116,6 +119,9 @@ CREATE TABLE IF NOT EXISTS produto(
         CONSTRAINT fk_produto_vendedor FOREIGN KEY (vendedorID)
         REFERENCES vendedor(vendedorID)
 );
+-- alterando tipo de dados
+ALTER TABLE produto
+	MODIFY descricao TEXT;
 
 CREATE TABLE IF NOT EXISTS estoque(
 		estoqueID INT AUTO_INCREMENT NOT NULL,
@@ -128,15 +134,19 @@ CREATE TABLE IF NOT EXISTS estoque(
         CONSTRAINT fk_estoque_endereco FOREIGN KEY (enderecoID)
         REFERENCES endereco(enderecoID)
 );
-
+-- adicionar constraint estoque unique produtoID
+ALTER TABLE estoque
+	ADD UNIQUE KEY unique_estoque_produtoID (produtoID);
+    
+    
 -- criar sessão de compra (carrinho_compras e itens_carrinho)
 
 CREATE TABLE IF NOT EXISTS carrinho_compras(
 		carrinhoID INT AUTO_INCREMENT NOT NULL,
         compradorID INT NOT NULL,
         andamentoCarrinho ENUM('Continuar Comprando', 'Finalizar Compra') DEFAULT 'Continuar Comprando',
-        criadoEm DATETIME,
-        finalizadoEm DATETIME,
+        criadoEm TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        finalizadoEm TIMESTAMP,
         PRIMARY KEY (carrinhoID),
         CONSTRAINT fk_carrinho_comprador FOREIGN KEY (compradorID)
         REFERENCES comprador(compradorID)
@@ -154,9 +164,11 @@ CREATE TABLE IF NOT EXISTS carrinho_itens(
         CONSTRAINT fk_carrinhoIten_carrinho FOREIGN KEY (carrinhoID)
         REFERENCES carrinho_compras(carrinhoID)
 );
-
+-- adicionando coluna total e tabela carrinho_itens
+ALTER TABLE carrinho_itens
+	ADD COLUMN total DECIMAL(10,2);
+    
 -- tabelas referentes a finalização do pedido e transação
-
 CREATE TABLE IF NOT EXISTS pedido(
 		pedidoID INT AUTO_INCREMENT NOT NULL,
         compradorID INT NOT NULL,
@@ -165,13 +177,17 @@ CREATE TABLE IF NOT EXISTS pedido(
 		descricao VARCHAR(255),
 		valorItens DECIMAL(10,2) NOT NULL,
 		frete DECIMAL(10,2) DEFAULT 0,
-		criadoEm DATETIME,
-        alteradoEm DATETIME,
-        finalizadoEm DATETIME,
+		criadoEm TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        alteradoEm TIMESTAMP,
+        finalizadoEm TIMESTAMP,
         PRIMARY KEY (pedidoID),
         CONSTRAINT fk_pedido_comprador FOREIGN KEY (compradorID)
         REFERENCES comprador(compradorID)
 );
+-- adicionar constraint pedido unique carrinhoID
+ALTER TABLE pedido
+	ADD UNIQUE KEY unique_pedido_carrinhoID (carrinhoID);
+    
 
 CREATE TABLE IF NOT EXISTS pedido_itens(
 		itensID INT AUTO_INCREMENT NOT NULL,
@@ -190,7 +206,7 @@ CREATE TABLE IF NOT EXISTS pedido_itens(
         compradorID INT NOT NULL,
         pedidoID INT NOT NULL,
 		pagamentoID INT NOT NULL,
-        finalizadoEm DATETIME,
+        finalizadoEm TIMESTAMP,
         PRIMARY KEY (finalizacaoID),
         CONSTRAINT fk_finalizacao_comprador FOREIGN KEY (compradorID)
         REFERENCES comprador(compradorID),
@@ -199,6 +215,9 @@ CREATE TABLE IF NOT EXISTS pedido_itens(
         CONSTRAINT fk_finalizacao_pagamento FOREIGN KEY (pagamentoID)
         REFERENCES pagamento(pagamentoID)
  );
+ -- adicionando coluna totalPedido
+ALTER TABLE finalizacao_pedido
+	ADD COLUMN totalPedido DECIMAL(10,2);
 
 CREATE TABLE IF NOT EXISTS entrega(
 		compradorID INT,
